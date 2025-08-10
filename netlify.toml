@@ -1,0 +1,13 @@
+[build]
+  command = "npm run netlify:build"
+  publish = ".next"
+
+[context.production.environment]
+  # Ensure OpenSSL is available for Prisma
+  NODE_OPTIONS = "--openssl-legacy-provider"
+  # Point Prisma to the Postgres schema on Netlify
+  PRISMA_SCHEMA_PATH = "prisma/schema.postgres.prisma"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+

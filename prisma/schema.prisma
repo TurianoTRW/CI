@@ -1,0 +1,104 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String     @id @default(cuid())
+  email          String     @unique
+  name           String?
+  hashedPassword String
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  contacts       Contact[]
+  deals          Deal[]
+  activities     Activity[]
+}
+
+model Company {
+  id        String    @id @default(cuid())
+  name      String
+  domain    String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  contacts  Contact[]
+  deals     Deal[]
+}
+
+model Contact {
+  id         String     @id @default(cuid())
+  firstName  String
+  lastName   String?
+  email      String?
+  phone      String?
+  position   String?
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  companyId  String?
+  company    Company?   @relation(fields: [companyId], references: [id])
+
+  ownerId    String?
+  owner      User?      @relation(fields: [ownerId], references: [id])
+
+  deals      Deal[]
+  activities Activity[]
+}
+
+model Deal {
+  id         String     @id @default(cuid())
+  title      String
+  amount     Int?
+  stage      String?    // e.g., prospecting, qualified, proposal, won, lost
+  status     String?    // custom status if needed
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  contactId  String?
+  contact    Contact?   @relation(fields: [contactId], references: [id])
+
+  companyId  String?
+  company    Company?   @relation(fields: [companyId], references: [id])
+
+  ownerId    String?
+  owner      User?      @relation(fields: [ownerId], references: [id])
+
+  activities Activity[]
+}
+
+model Activity {
+  id         String       @id @default(cuid())
+  type       ActivityType
+  note       String?
+  dueDate    DateTime?
+  completed  Boolean      @default(false)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  contactId  String?
+  contact    Contact?     @relation(fields: [contactId], references: [id])
+
+  dealId     String?
+  deal       Deal?        @relation(fields: [dealId], references: [id])
+
+  ownerId    String?
+  owner      User?        @relation(fields: [ownerId], references: [id])
+}
+
+enum ActivityType {
+  NOTE
+  TASK
+  EMAIL
+  CALL
+  MEETING
+}
